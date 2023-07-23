@@ -6,8 +6,9 @@ import {
   GraphQLNonNull,
   GraphQLList,
 } from 'graphql';
-import ProfileType from '../profile/types.js';
+
 import { ContextType } from '../../types/context.js';
+import { ProfileType } from '../profile/types.js';
 
 type MemberTypeParentType = { id: string };
 
@@ -19,7 +20,7 @@ export const MemberTypeId = new GraphQLEnumType({
   },
 });
 
-const MemberType: GraphQLObjectType<MemberTypeParentType, ContextType> =
+export const MemberType: GraphQLObjectType<MemberTypeParentType, ContextType> =
   new GraphQLObjectType({
     name: 'MemberType',
     fields: () => ({
@@ -38,5 +39,3 @@ const MemberType: GraphQLObjectType<MemberTypeParentType, ContextType> =
       },
     }),
   });
-
-export default MemberType;

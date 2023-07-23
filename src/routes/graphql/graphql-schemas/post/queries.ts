@@ -2,7 +2,7 @@ import { GraphQLList } from 'graphql';
 
 import { ContextType } from '../../types/context.js';
 import { UUIDType } from '../../types/uuid.js';
-import PostType from './types.js';
+import { PostType } from './types.js';
 
 const PostQueries = {
   posts: {

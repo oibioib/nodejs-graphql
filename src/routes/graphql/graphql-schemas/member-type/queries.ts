@@ -1,7 +1,7 @@
 import { GraphQLList } from 'graphql';
 
 import { ContextType } from '../../types/context.js';
-import MemberType, { MemberTypeId } from './types.js';
+import { MemberType, MemberTypeId } from './types.js';
 
 const MemberTypeQueries = {
   memberTypes: {

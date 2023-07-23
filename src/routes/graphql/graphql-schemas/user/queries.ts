@@ -1,8 +1,8 @@
 import { GraphQLList } from 'graphql';
 
-import { UUIDType } from '../../types/uuid.js';
 import { ContextType } from '../../types/context.js';
-import UserType from './types.js';
+import { UUIDType } from '../../types/uuid.js';
+import { UserType } from './types.js';
 
 const UserQueries = {
   users: {

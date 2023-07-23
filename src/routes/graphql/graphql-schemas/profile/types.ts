@@ -1,15 +1,21 @@
 import { UUIDType } from '../../types/uuid.js';
-import { GraphQLObjectType, GraphQLBoolean, GraphQLInt } from 'graphql';
-import MemberType, { MemberTypeId } from '../member-type/types.js';
+import {
+  GraphQLObjectType,
+  GraphQLBoolean,
+  GraphQLInt,
+  GraphQLInputObjectType,
+} from 'graphql';
+
 import { ContextType } from '../../types/context.js';
-import UserType from '../user/types.js';
+import { UserType } from '../user/types.js';
+import { MemberType, MemberTypeId } from '../member-type/types.js';
 
 type ProfileParentType = {
   userId: string;
   memberTypeId: string;
 };
 
-const ProfileType: GraphQLObjectType<ProfileParentType, ContextType> =
+export const ProfileType: GraphQLObjectType<ProfileParentType, ContextType> =
   new GraphQLObjectType({
     name: 'Profile',
     fields: () => ({
@@ -41,4 +47,12 @@ const ProfileType: GraphQLObjectType<ProfileParentType, ContextType> =
     }),
   });
 
-export default ProfileType;
+export const CreateProfileInputType = new GraphQLInputObjectType({
+  name: 'CreateProfileInput',
+  fields: () => ({
+    isMale: { type: GraphQLBoolean },
+    yearOfBirth: { type: GraphQLInt },
+    userId: { type: UUIDType },
+    memberTypeId: { type: MemberTypeId },
+  }),
+});
