@@ -4,6 +4,7 @@ import {
   GraphQLBoolean,
   GraphQLInt,
   GraphQLInputObjectType,
+  GraphQLNonNull,
 } from 'graphql';
 
 import { ContextType } from '../../types/context.js';
@@ -50,9 +51,9 @@ export const ProfileType: GraphQLObjectType<ProfileParentType, ContextType> =
 export const CreateProfileInputType = new GraphQLInputObjectType({
   name: 'CreateProfileInput',
   fields: () => ({
-    isMale: { type: GraphQLBoolean },
-    yearOfBirth: { type: GraphQLInt },
-    userId: { type: UUIDType },
-    memberTypeId: { type: MemberTypeId },
+    isMale: { type: new GraphQLNonNull(GraphQLBoolean) },
+    yearOfBirth: { type: new GraphQLNonNull(GraphQLInt) },
+    userId: { type: new GraphQLNonNull(UUIDType) },
+    memberTypeId: { type: new GraphQLNonNull(MemberTypeId) },
   }),
 });

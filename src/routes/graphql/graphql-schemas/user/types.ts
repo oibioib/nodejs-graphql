@@ -4,6 +4,7 @@ import {
   GraphQLFloat,
   GraphQLList,
   GraphQLInputObjectType,
+  GraphQLNonNull,
 } from 'graphql';
 
 import { ContextType } from '../../types/context.js';
@@ -70,7 +71,7 @@ export const UserType: GraphQLObjectType<UserParentType, ContextType> =
 export const CreateUserInputType = new GraphQLInputObjectType({
   name: 'CreateUserInput',
   fields: () => ({
-    name: { type: GraphQLString },
-    balance: { type: GraphQLFloat },
+    name: { type: new GraphQLNonNull(GraphQLString) },
+    balance: { type: new GraphQLNonNull(GraphQLFloat) },
   }),
 });
