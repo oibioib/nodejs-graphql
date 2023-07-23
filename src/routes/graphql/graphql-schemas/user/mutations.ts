@@ -30,7 +30,7 @@ const UserMutations = {
       try {
         await context.prismaClient.user.delete({ where: { id: args.id } });
         return true;
-      } catch (err) {
+      } catch {
         return false;
       }
     },
@@ -49,6 +49,48 @@ const UserMutations = {
         data: args.dto,
       });
       return user;
+    },
+  },
+
+  subscribeTo: {
+    type: UserType,
+    args: { userId: { type: UUIDType }, authorId: { type: UUIDType } },
+    resolve: async (
+      _parent: unknown,
+      args: { userId: string; authorId: string },
+      context: ContextType,
+    ) => {
+      await context.prismaClient.subscribersOnAuthors.create({
+        data: {
+          subscriberId: args.userId,
+          authorId: args.authorId,
+        },
+      });
+
+      const user = context.prismaClient.user.findUnique({ where: { id: args.userId } });
+      return user;
+    },
+  },
+
+  unsubscribeFrom: {
+    type: GraphQLBoolean,
+    args: { userId: { type: UUIDType }, authorId: { type: UUIDType } },
+    resolve: async (
+      _parent: unknown,
+      args: { userId: string; authorId: string },
+      context: ContextType,
+    ) => {
+      try {
+        await context.prismaClient.subscribersOnAuthors.deleteMany({
+          where: {
+            subscriberId: args.userId,
+            authorId: args.authorId,
+          },
+        });
+        return true;
+      } catch {
+        return false;
+      }
     },
   },
 };
