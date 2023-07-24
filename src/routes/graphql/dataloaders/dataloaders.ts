@@ -13,7 +13,7 @@ export const userDataLoader = (prismaClient: PrismaClient) => {
       include: { userSubscribedTo: true, subscribedToUser: true },
     });
 
-    const usersByIds = ids.map((id: string) => users.find((user) => user.id === id));
+    const usersByIds = ids.map((id) => users.find((user) => user.id === id));
 
     return usersByIds;
   });
@@ -27,7 +27,7 @@ export const profileDataLoader = (prismaClient: PrismaClient) => {
       where: { userId: { in: ids as string[] } },
     });
 
-    const profilesByIds = ids.map((id: string) =>
+    const profilesByIds = ids.map((id) =>
       profiles.find((profile) => profile.userId === id),
     );
 
@@ -42,9 +42,7 @@ export const postDataLoader = (prismaClient: PrismaClient) => {
       where: { authorId: { in: ids as string[] } },
     });
 
-    const postsByIds = ids.map((id: string) =>
-      posts.filter((post) => post.authorId === id),
-    );
+    const postsByIds = ids.map((id) => posts.filter((post) => post.authorId === id));
 
     return postsByIds;
   });
@@ -58,7 +56,7 @@ export const memberTypeDataLoader = (prismaClient: PrismaClient) => {
       where: { id: { in: ids as string[] } },
     });
 
-    const memberTypesByIds = ids.map((id: string) =>
+    const memberTypesByIds = ids.map((id) =>
       memberTypes.find((memberType) => memberType.id === id),
     );
 

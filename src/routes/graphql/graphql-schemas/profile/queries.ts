@@ -8,7 +8,6 @@ const ProfileQueries = {
   profiles: {
     type: new GraphQLList(ProfileType),
     resolve: async (_parent: unknown, _args: unknown, context: ContextType) => {
-      console.log('get profiles');
       const profiles = await context.prismaClient.profile.findMany();
       return profiles;
     },

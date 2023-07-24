@@ -7,9 +7,7 @@ import {
   GraphQLNonNull,
 } from 'graphql';
 
-import DataLoader from 'dataloader';
-
-import { ContextType, DataLoaderType } from '../../types/context.js';
+import { ContextType } from '../../types/context.js';
 import { UUIDType } from '../../types/uuid.js';
 import { ProfileType, ProfileSchemaType } from '../profile/types.js';
 import { PostSchemaType, PostType } from '../post/types.js';

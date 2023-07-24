@@ -1,8 +1,8 @@
 import { GraphQLBoolean } from 'graphql';
 
 import { ContextType } from '../../types/context.js';
-import { ChangePostInputType, CreatePostInputType, PostType } from './types.js';
 import { UUIDType } from '../../types/uuid.js';
+import { ChangePostInputType, CreatePostInputType, PostType } from './types.js';
 
 type MutationsPostDtoType = {
   authorId: string;

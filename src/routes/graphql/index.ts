@@ -7,6 +7,7 @@ import depthLimit from 'graphql-depth-limit';
 import getDataLoaders from './dataloaders/dataloaders.js';
 
 const GRAPHQL_DEPTH_LIMIT = 5;
+const QUERY_VALIDATING_ERROR_MESSAGE = 'Error validating request query!';
 
 const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.route({
@@ -19,23 +20,33 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
       },
     },
     async handler(req) {
-      const parsedQuery = parse(req.body.query);
-      const validateErrors = validate(rootSchema, parsedQuery, [
+      const {
+        body: { query, variables },
+      } = req;
+
+      const validateErrors = validate(rootSchema, parse(query), [
         depthLimit(GRAPHQL_DEPTH_LIMIT),
       ]);
 
-      if (validateErrors && validateErrors.length != 0) {
-        return { data: '', errors: validateErrors };
+      if (validateErrors.length) {
+        return {
+          data: {
+            message: QUERY_VALIDATING_ERROR_MESSAGE,
+          },
+          errors: validateErrors,
+        };
       }
+
+      const contextValue = {
+        prismaClient: fastify.prisma,
+        dataloaders: getDataLoaders(fastify.prisma),
+      };
 
       const { data, errors } = await graphql({
         schema: rootSchema,
-        source: req.body.query,
-        variableValues: req.body.variables,
-        contextValue: {
-          prismaClient: fastify.prisma,
-          dataloaders: getDataLoaders(fastify.prisma),
-        },
+        source: query,
+        variableValues: variables,
+        contextValue,
       });
 
       return { data, errors };

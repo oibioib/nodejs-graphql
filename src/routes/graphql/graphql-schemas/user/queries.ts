@@ -1,13 +1,13 @@
 import { GraphQLList, GraphQLResolveInfo } from 'graphql';
-
-import { ContextType } from '../../types/context.js';
-import { UUIDType } from '../../types/uuid.js';
-import { UserSchemaType, UserType } from './types.js';
 import {
   parseResolveInfo,
   simplifyParsedResolveInfoFragmentWithType,
   ResolveTree,
 } from 'graphql-parse-resolve-info';
+
+import { ContextType } from '../../types/context.js';
+import { UUIDType } from '../../types/uuid.js';
+import { UserSchemaType, UserType } from './types.js';
 
 const UserQueries = {
   users: {
