@@ -4,6 +4,7 @@ import { graphql, parse, validate } from 'graphql';
 
 import rootSchema from './graphql-schemas/root-schema.js';
 import depthLimit from 'graphql-depth-limit';
+import getDataLoaders from './dataloaders/dataloaders.js';
 
 const GRAPHQL_DEPTH_LIMIT = 5;
 
@@ -31,7 +32,10 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
         schema: rootSchema,
         source: req.body.query,
         variableValues: req.body.variables,
-        contextValue: { prismaClient: fastify.prisma, dataloaders: new WeakMap() },
+        contextValue: {
+          prismaClient: fastify.prisma,
+          dataloaders: getDataLoaders(fastify.prisma),
+        },
       });
 
       return { data, errors };

@@ -39,139 +39,39 @@ export const UserType: GraphQLObjectType<UserSchemaType, ContextType> =
 
       profile: {
         type: ProfileType,
-        resolve: async (parent, _args: unknown, context, info) => {
-          let dl: DataLoaderType<ProfileSchemaType> = context.dataloaders.get(
-            info.fieldNodes,
-          );
-
-          if (!dl) {
-            dl = new DataLoader(async (ids: Readonly<string[]>) => {
-              const profiles: ProfileSchemaType[] =
-                await context.prismaClient.profile.findMany({
-                  where: { userId: { in: ids as string[] } },
-                });
-
-              const profilesByIds = ids.map((id: string) =>
-                profiles.find((profile) => profile.userId === id),
-              );
-
-              return profilesByIds;
-            });
-
-            context.dataloaders.set(info.fieldNodes, dl);
-          }
-
-          return dl.load(parent.id);
+        resolve: async (parent, _args: unknown, context) => {
+          const profile = await context.dataloaders.profileDataLoader.load(parent.id);
+          return profile;
         },
       },
 
       posts: {
         type: new GraphQLList(PostType),
-        resolve: async (parent, _args: unknown, context, info) => {
-          let dl: DataLoaderType<PostSchemaType[]> = context.dataloaders.get(
-            info.fieldNodes,
-          );
-
-          if (!dl) {
-            dl = new DataLoader(async (ids: Readonly<string[]>) => {
-              const posts: PostSchemaType[] = await context.prismaClient.post.findMany({
-                where: { authorId: { in: ids as string[] } },
-              });
-
-              const postsByIds = ids.map((id: string) =>
-                posts.filter((post) => post.authorId === id),
-              );
-
-              return postsByIds;
-            });
-
-            context.dataloaders.set(info.fieldNodes, dl);
-          }
-
-          return dl.load(parent.id);
+        resolve: async (parent, _args: unknown, context) => {
+          const posts = await context.dataloaders.postDataLoader.load(parent.id);
+          return posts;
         },
       },
 
       userSubscribedTo: {
         type: new GraphQLList(UserType),
-
-        resolve: async (parent, _args: unknown, context, info) => {
-          let dl: DataLoaderType<UserSchemaType[]> = context.dataloaders.get(
-            info.fieldNodes,
-          );
-
-          if (!dl) {
-            dl = new DataLoader(async (ids: Readonly<string[]>) => {
-              const users: UserSchemaType[] = await context.prismaClient.user.findMany({
-                include: {
-                  userSubscribedTo: false,
-                  subscribedToUser: true,
-                },
-                where: {
-                  subscribedToUser: { some: { subscriberId: { in: ids as string[] } } },
-                },
-              });
-
-              const authorsBiIds = ids.map((id: string) => {
-                const authors = users.filter((user) => {
-                  if (user.subscribedToUser) {
-                    return user.subscribedToUser.find(
-                      (author) => author.subscriberId === id,
-                    );
-                  }
-                  return null;
-                });
-                return authors;
-              });
-
-              return authorsBiIds;
-            });
-
-            context.dataloaders.set(info.fieldNodes, dl);
+        resolve: async (parent, _args: unknown, context) => {
+          if (parent.userSubscribedTo && parent.userSubscribedTo.length) {
+            const usersIds = parent.userSubscribedTo.map((user) => user.authorId);
+            const authors = context.dataloaders.userDataLoader.loadMany(usersIds);
+            return authors;
           }
-
-          return dl.load(parent.id);
         },
       },
 
       subscribedToUser: {
         type: new GraphQLList(UserType),
-        resolve: async (parent, _args: unknown, context, info) => {
-          let dl: DataLoaderType<UserSchemaType[]> = context.dataloaders.get(
-            info.fieldNodes,
-          );
-
-          if (!dl) {
-            dl = new DataLoader(async (ids: Readonly<string[]>) => {
-              const users: UserSchemaType[] = await context.prismaClient.user.findMany({
-                include: {
-                  userSubscribedTo: true,
-                  subscribedToUser: false,
-                },
-                where: {
-                  userSubscribedTo: { some: { authorId: { in: ids as string[] } } },
-                },
-              });
-
-              const subscribersByIds = ids.map((id: string) => {
-                const subscribers = users.filter((user) => {
-                  if (user.userSubscribedTo) {
-                    return user.userSubscribedTo.find(
-                      (subscriber) => subscriber.authorId === id,
-                    );
-                  }
-                  return null;
-                });
-                return subscribers;
-              });
-
-              return subscribersByIds;
-            });
-
-            context.dataloaders.set(info.fieldNodes, dl);
+        resolve: async (parent, _args: unknown, context) => {
+          if (parent.subscribedToUser && parent.subscribedToUser.length) {
+            const usersIds = parent.subscribedToUser.map((user) => user.subscriberId);
+            const subscribers = context.dataloaders.userDataLoader.loadMany(usersIds);
+            return subscribers;
           }
-
-          return dl.load(parent.id);
         },
       },
     }),

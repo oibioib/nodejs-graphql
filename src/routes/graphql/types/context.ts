@@ -1,10 +1,19 @@
 import { PrismaClient } from '@prisma/client';
 import DataLoader from 'dataloader';
 
-export type DataLoaderType<T> = DataLoader<string, T | undefined, string> | undefined;
+import { UserSchemaType } from '../graphql-schemas/user/types.js';
+import { ProfileSchemaType } from '../graphql-schemas/profile/types.js';
+import { PostSchemaType } from '../graphql-schemas/post/types.js';
+import { MemberSchemaType } from '../graphql-schemas/member-type/types.js';
+
+export type DataLoaderType<T> = DataLoader<string, T | undefined, string>;
 
 export type ContextType = {
   prismaClient: PrismaClient;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  dataloaders: WeakMap<object, DataLoader<string, any, string>>;
+  dataloaders: {
+    userDataLoader: DataLoaderType<UserSchemaType>;
+    profileDataLoader: DataLoaderType<ProfileSchemaType>;
+    postDataLoader: DataLoaderType<PostSchemaType>;
+    memberTypeDataLoader: DataLoaderType<MemberSchemaType>;
+  };
 };
