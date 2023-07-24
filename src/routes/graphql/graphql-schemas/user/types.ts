@@ -29,16 +29,6 @@ export type UserSchemaType = {
   subscribedToUser?: SubscriberSchemaType[];
 };
 
-type UserSubscribedToType = {
-  subscriberId: string;
-  author: UserSchemaType;
-};
-
-type SubscribedToUserType = {
-  authorId: string;
-  subscriber: UserSchemaType;
-};
-
 export const UserType: GraphQLObjectType<UserSchemaType, ContextType> =
   new GraphQLObjectType({
     name: 'User',
@@ -61,11 +51,11 @@ export const UserType: GraphQLObjectType<UserSchemaType, ContextType> =
                   where: { userId: { in: ids as string[] } },
                 });
 
-              const sortedInIdsOrder = ids.map((id: string) =>
+              const profilesByIds = ids.map((id: string) =>
                 profiles.find((profile) => profile.userId === id),
               );
 
-              return sortedInIdsOrder;
+              return profilesByIds;
             });
 
             context.dataloaders.set(info.fieldNodes, dl);
@@ -88,11 +78,11 @@ export const UserType: GraphQLObjectType<UserSchemaType, ContextType> =
                 where: { authorId: { in: ids as string[] } },
               });
 
-              const sortedInIdsOrder = ids.map((id: string) =>
+              const postsByIds = ids.map((id: string) =>
                 posts.filter((post) => post.authorId === id),
               );
 
-              return sortedInIdsOrder;
+              return postsByIds;
             });
 
             context.dataloaders.set(info.fieldNodes, dl);
@@ -112,18 +102,29 @@ export const UserType: GraphQLObjectType<UserSchemaType, ContextType> =
 
           if (!dl) {
             dl = new DataLoader(async (ids: Readonly<string[]>) => {
-              const data: UserSubscribedToType[] =
-                await context.prismaClient.subscribersOnAuthors.findMany({
-                  where: { subscriberId: { in: ids as string[] } },
-                  select: { author: true, subscriberId: true },
-                });
-
-              const sortedInIdsOrder = ids.map((id: string) => {
-                const authors = data.filter((item) => item.subscriberId === id);
-                return authors.map(({ author }) => author);
+              const users: UserSchemaType[] = await context.prismaClient.user.findMany({
+                include: {
+                  userSubscribedTo: false,
+                  subscribedToUser: true,
+                },
+                where: {
+                  subscribedToUser: { some: { subscriberId: { in: ids as string[] } } },
+                },
               });
 
-              return sortedInIdsOrder;
+              const authorsBiIds = ids.map((id: string) => {
+                const authors = users.filter((user) => {
+                  if (user.subscribedToUser) {
+                    return user.subscribedToUser.find(
+                      (author) => author.subscriberId === id,
+                    );
+                  }
+                  return null;
+                });
+                return authors;
+              });
+
+              return authorsBiIds;
             });
 
             context.dataloaders.set(info.fieldNodes, dl);
@@ -142,18 +143,29 @@ export const UserType: GraphQLObjectType<UserSchemaType, ContextType> =
 
           if (!dl) {
             dl = new DataLoader(async (ids: Readonly<string[]>) => {
-              const data: SubscribedToUserType[] =
-                await context.prismaClient.subscribersOnAuthors.findMany({
-                  where: { authorId: { in: ids as string[] } },
-                  select: { subscriber: true, authorId: true },
-                });
-
-              const sortedInIdsOrder = ids.map((id: string) => {
-                const subscribers = data.filter((item) => item.authorId === id);
-                return subscribers.map(({ subscriber }) => subscriber);
+              const users: UserSchemaType[] = await context.prismaClient.user.findMany({
+                include: {
+                  userSubscribedTo: true,
+                  subscribedToUser: false,
+                },
+                where: {
+                  userSubscribedTo: { some: { authorId: { in: ids as string[] } } },
+                },
               });
 
-              return sortedInIdsOrder;
+              const subscribersByIds = ids.map((id: string) => {
+                const subscribers = users.filter((user) => {
+                  if (user.userSubscribedTo) {
+                    return user.userSubscribedTo.find(
+                      (subscriber) => subscriber.authorId === id,
+                    );
+                  }
+                  return null;
+                });
+                return subscribers;
+              });
+
+              return subscribersByIds;
             });
 
             context.dataloaders.set(info.fieldNodes, dl);
