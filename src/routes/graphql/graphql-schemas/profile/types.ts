@@ -7,16 +7,21 @@ import {
   GraphQLNonNull,
 } from 'graphql';
 
-import { ContextType } from '../../types/context.js';
-import { UserType } from '../user/types.js';
-import { MemberType, MemberTypeId } from '../member-type/types.js';
+import DataLoader from 'dataloader';
 
-type ProfileParentType = {
+import { ContextType, DataLoaderType } from '../../types/context.js';
+import { UserType } from '../user/types.js';
+import { MemberSchemaType, MemberType, MemberTypeId } from '../member-type/types.js';
+
+export type ProfileSchemaType = {
+  id: string;
+  isMale: boolean;
+  yearOfBirth: number;
   userId: string;
   memberTypeId: string;
 };
 
-export const ProfileType: GraphQLObjectType<ProfileParentType, ContextType> =
+export const ProfileType: GraphQLObjectType<ProfileSchemaType, ContextType> =
   new GraphQLObjectType({
     name: 'Profile',
     fields: () => ({
@@ -38,11 +43,29 @@ export const ProfileType: GraphQLObjectType<ProfileParentType, ContextType> =
 
       memberType: {
         type: MemberType,
-        resolve: async (parent, _args: unknown, context) => {
-          const userMemberType = await context.prismaClient.memberType.findUnique({
-            where: { id: parent.memberTypeId },
-          });
-          return userMemberType;
+        resolve: async (parent, _args: unknown, context, info) => {
+          let dl: DataLoaderType<MemberSchemaType> = context.dataloaders.get(
+            info.fieldNodes,
+          );
+
+          if (!dl) {
+            dl = new DataLoader(async (ids: Readonly<string[]>) => {
+              const memberTypes: MemberSchemaType[] =
+                await context.prismaClient.memberType.findMany({
+                  where: { id: { in: ids as string[] } },
+                });
+
+              const sortedInIdsOrder = ids.map((id: string) =>
+                memberTypes.find((memberType) => memberType.id === id),
+              );
+
+              return sortedInIdsOrder;
+            });
+
+            context.dataloaders.set(info.fieldNodes, dl);
+          }
+
+          return dl.load(parent.memberTypeId);
         },
       },
     }),

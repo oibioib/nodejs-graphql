@@ -9,9 +9,14 @@ import { ContextType } from '../../types/context.js';
 import { UUIDType } from '../../types/uuid.js';
 import { UserType } from '../user/types.js';
 
-type PostParentType = { authorId: string };
+export type PostSchemaType = {
+  id: string;
+  title: string;
+  content: string;
+  authorId: string;
+};
 
-export const PostType: GraphQLObjectType<PostParentType, ContextType> =
+export const PostType: GraphQLObjectType<PostSchemaType, ContextType> =
   new GraphQLObjectType({
     name: 'Post',
     fields: () => ({

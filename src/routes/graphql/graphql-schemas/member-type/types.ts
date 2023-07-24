@@ -10,7 +10,11 @@ import {
 import { ContextType } from '../../types/context.js';
 import { ProfileType } from '../profile/types.js';
 
-type MemberTypeParentType = { id: string };
+export type MemberSchemaType = {
+  id: string;
+  discount: number;
+  postsLimitPerMonth: number;
+};
 
 export const MemberTypeId = new GraphQLEnumType({
   name: 'MemberTypeId',
@@ -20,7 +24,7 @@ export const MemberTypeId = new GraphQLEnumType({
   },
 });
 
-export const MemberType: GraphQLObjectType<MemberTypeParentType, ContextType> =
+export const MemberType: GraphQLObjectType<MemberSchemaType, ContextType> =
   new GraphQLObjectType({
     name: 'MemberType',
     fields: () => ({

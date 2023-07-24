@@ -31,7 +31,7 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
         schema: rootSchema,
         source: req.body.query,
         variableValues: req.body.variables,
-        contextValue: { prismaClient: fastify.prisma },
+        contextValue: { prismaClient: fastify.prisma, dataloaders: new WeakMap() },
       });
 
       return { data, errors };
